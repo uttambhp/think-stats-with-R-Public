@@ -1,0 +1,102 @@
+---
+title: 'Chapter 3: Probability Mass Functions'
+author: "Ghislain Nono Gueye, Ph.D."
+date: "3/9/2019"
+output: bookdown::pdf_document2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load_packages}
+library(dplyr)
+library(stringr)
+library(purrr)
+library(tidyr)
+library(ggplot2)
+
+theme_set(theme_minimal())
+```
+
+
+# Probability mass functions (Pmfs)
+
+```{r}
+prob_mass_fun <- function(x){
+	df <- as.data.frame(prop.table(table(x)))
+	colnames(df) <- c("value", "probability")
+	df$value <- as.numeric(as.character(df$value))
+	df
+}
+
+prob_mass_fun <- function(x){
+	tibble(value = x) %>%
+		group
+}
+
+prob_mass_fun(c(1, 2, 2, 3, 5))
+
+```
+
+
+# The class size paradox
+
+```{r custom_functions}
+compute_avg_size <- function(x){
+	x %>%
+		as.character() %>%
+		str_split(pattern = "-") %>%
+		map(as.numeric) %>%
+		map_dbl(mean)
+}
+
+compute_prob <- function(x){
+	x / sum(x)
+}
+```
+
+
+```{r}
+dat <- 
+	tibble(
+	size = c("5-9", "10-14", "15-19", "20-24", "25-29", "30-34", "35-39", "40-44", "45-49"),
+	count = c(8, 8, 14, 4, 6, 12, 8, 3, 2)
+	) %>%
+	mutate(
+		avg_size = compute_avg_size(size),
+		prob_size = count / sum(count),
+		prob_dean = avg_size * prob_size,
+		prob_student = avg_size * prob_dean / sum(prob_dean)
+	) %>%
+	select(size, avg_size, count, everything())
+
+dat
+
+summarize(dat, avg_class_size_dean = sum(prob_dean), avg_class_size_student = sum(prob_student))
+```
+
+
+```{r}
+dat %>%
+	select(-size, -count, -prob_size) %>%
+	mutate_at(.vars = vars(matches("prob")), .funs = compute_prob) %>%
+	gather(key = "prob_type", value = "value", -avg_size) %>%
+	
+ggplot(aes(x = avg_size, y = value, col = prob_type)) +
+	geom_step() +
+	labs(x = "Class size", y = "Probability Mass Functon")
+```
+
+
+```{r}
+# UnBiasPmf
+```
+
+
+# DataFrame indexing
+
+```{r}
+
+```
+
